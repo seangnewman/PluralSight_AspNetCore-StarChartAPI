@@ -76,9 +76,80 @@ namespace StarChart.Controllers
 
         }
 
+        [HttpPost]
+        public IActionResult Create([FromBody]CelestialObject celestialObject)
+        {
+            _context.CelestialObjects.Add(celestialObject);
+            if(_context.SaveChanges() > 0)
+            {
+                return CreatedAtRoute("GetById", new { id = celestialObject.Id }, celestialObject);
+            }
+            else
+            {
+                return BadRequest("Could not Add Object");
+             }
 
+         }
 
+        [HttpPut("{id}")]
+        public IActionResult Update(int id, CelestialObject celestialObject)
+        {
+            var result = _context.CelestialObjects.Find(id);
 
+            if(result != null)
+            {
+                result.Name = celestialObject.Name;
+                result.OrbitalPeriod = celestialObject.OrbitalPeriod;
+                result.OrbitedObjectId = celestialObject.OrbitedObjectId;
+
+                _context.CelestialObjects.Update(result);
+
+                _context.SaveChanges();
+                return NoContent();
+            }
+            else
+            {
+                return NotFound();
+            }
+
+        }
+
+        [HttpPatch("{id}/{name}")]
+        public IActionResult RenameObject(int id, string name)
+        {
+            var result = _context.CelestialObjects.Find(id);
+
+            if (result != null)
+            {
+                result.Name = name;
+                _context.CelestialObjects.Update(result);
+                _context.SaveChanges();
+                return NoContent();
+            }
+            else
+            {
+                return NotFound();
+            }
+
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            var result = _context.CelestialObjects.Where(i => i.Id == id || i.OrbitedObjectId == id);
+
+            if (result.Any())
+            {
+                _context.RemoveRange(result);
+                _context.SaveChanges();
+                return NoContent();
+            }
+            else
+            {
+                return NotFound();
+            }
+
+        }
 
     }
 }
